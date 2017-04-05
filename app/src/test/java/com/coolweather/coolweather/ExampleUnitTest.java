@@ -1,4 +1,4 @@
-package com.coolweather.collweather;
+package com.coolweather.coolweather;
 
 import org.junit.Test;
 

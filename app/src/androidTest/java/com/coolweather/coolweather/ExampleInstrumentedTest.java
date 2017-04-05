@@ -1,4 +1,4 @@
-package com.coolweather.collweather;
+package com.coolweather.coolweather;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
