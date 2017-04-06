@@ -1,9 +1,11 @@
 package com.coolweather.coolweather;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +66,11 @@ public class ChooseAreaFragment extends Fragment{
     private City selectedCity;
 
     /*
+    * 选中的县
+    * */
+    private County selectedCounty;
+
+    /*
    * 省列表
    * */
     private List<Province> provinceList;
@@ -99,6 +106,7 @@ public class ChooseAreaFragment extends Fragment{
         queryProvinces();//初始提供数据
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (currentLevel == LEVEL_PROVINCE){
@@ -107,6 +115,14 @@ public class ChooseAreaFragment extends Fragment{
                 } else if(currentLevel == LEVEL_CITY){
                     selectedCity = cityList.get(position);
                     queryCounties();
+                } else if(currentLevel == LEVEL_COUNTY) {
+                    selectedCounty = countList.get(position);
+                    String weatherId = selectedCounty.getWeatherId();
+                    Intent intent = new Intent(getActivity(),WeatherActivity.class);
+                    //点击县携带天气ID跳转
+                    intent.putExtra("weather_id",weatherId);
+                    startActivity(intent);
+                    getActivity().finish();
                 }
             }
         });
@@ -123,6 +139,8 @@ public class ChooseAreaFragment extends Fragment{
         });
     }
 
+
+    private static final String TAG = "=========";
     /*
     * 查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器上查询
     * */
@@ -130,12 +148,14 @@ public class ChooseAreaFragment extends Fragment{
         titleText.setText("中国");
         backButton.setVisibility(View.GONE);
         provinceList = DataSupport.findAll(Province.class);
+        Log.e(TAG, "queryProvinces: ==provinceList=="+provinceList.toString());
         if (provinceList.size() > 0){
             datalist.clear();
             for (Province province :provinceList
                  ) {
                 datalist.add(province.getProvinceName());
             }
+            Log.e(TAG, "queryProvinces: ==datalist=="+datalist.toString());
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
@@ -201,7 +221,11 @@ public class ChooseAreaFragment extends Fragment{
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String responseText = response.body().toString();
+                /*
+                * body().string()而不是body().toString()
+                * */
+                String responseText = response.body().string();
+                Log.e(TAG, "onResponse: "+responseText.toString());
                 boolean result = false;
                 //服务器查询并保存
                 if ("province".equals(type)){
@@ -212,6 +236,7 @@ public class ChooseAreaFragment extends Fragment{
                     result = Utility.handleCountyResponse(responseText,selectedCity.getId());
                 }
 
+                Log.e(TAG, "onResponse: "+result );
                 if (result) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override

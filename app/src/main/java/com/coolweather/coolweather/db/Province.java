@@ -18,6 +18,15 @@ public class Province extends DataSupport{
         return id;
     }
 
+    @Override
+    public String toString() {
+        return "Province{" +
+                "id=" + id +
+                ", provinceName='" + provinceName + '\'' +
+                ", provinceCode=" + provinceCode +
+                '}';
+    }
+
     public String getProvinceName() {
         return provinceName;
     }
